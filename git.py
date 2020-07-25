@@ -11,7 +11,7 @@ async def on_member_join(member):
 
 @client.event
 async def on_message(message):
-    id = client.get_guild(723567222735241257)
+    id = client.get_guild(your server id)
     if message.content.find("!hello") != -1:
         await message.channel.send("Hi")
     elif message.content == "!users":
@@ -30,4 +30,4 @@ async def on_message(message):
         await message.channel.send(content=None, embed=embed)
     
 
-client.run("NzM2MjE2MTM5OTY0ODc0NzY3.Xxrktg.FumiIYbealEHRa-0F9TfJmSsiHY")
+client.run("your id")
