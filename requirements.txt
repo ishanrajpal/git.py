@@ -29,7 +29,6 @@ playsound==1.2.2
 PyAudio==0.2.11
 pycodestyle==2.6.0
 pyflakes==2.2.0
-pypiwin32==223
 python-git==2018.2.1
 pyttsx3==2.88
 pywin32==228
