@@ -146,8 +146,7 @@ async def play(ctx, url: str):
             ydl.download([url])
     except:
         print("Fallback: youtube-dl does not support this url ,using spotify")
-        c_path = os.path.dirname(os.path.realpath(__file__))
-        system("spotdl -f " + '"' + c_path + '"' + " -s " + url)
+        system("spotdl -f " + '"' + "./" + '"' + " -s " + url)
     
     for file in os.listdir("./"):
         if file.endswith(".mp3"):
