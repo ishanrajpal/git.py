@@ -5,38 +5,52 @@ import youtube_dl
 import os
 from os import system
 from discord import Spotify
-import spotdl
 import shutil
+import spotipy
 
-client = commands.Bot(command_prefix = ".")
+client = commands.Bot(command_prefix = "")
 client.remove_command('help')
 
 global name
 
+
 @client.event
 async def on_ready():
     await client.change_presence(status=discord.Status.online, activity=discord.Game('With my own life'))
-    print('Bot is ready.')
-
-
-@client.command()
-async def ping(ctx):
-    await ctx.send(f"Your ping is :{round(client.latency * 1000)} ms")
-
-
+    print("Logged in as: " + client.user.name + "\n")
 @client.event
 async def on_member_join(member):
     print(f'{member} has joined a server.')                     #change
     for channel in member.guild.channels:
         if str(channel) == "general":
             await channel.send(f"""Welcome to the server {member.mention}""")
+            await channel.send("Member += 1")
+            member_count = len(channel.guild.members)
+            await channel.send(f"""Total Members in this Server is: {member_count}""")
+
 @client.event
 async def on_member_remove(member):
     print(f'{member} has left a server.')
     for channel in member.guild.channels:                   #change
         if str(channel) == "general":
             await channel.send(f"""Member has been Kicked/Removed from server {member.mention}""")
+            await channel.send("Member -= 1")
+            member_count = len(channel.guild.members)
+            await channel.send(f"""Total Members in this Server is: {member_count}""")
 
+
+@client.command()
+async def ping(ctx):                        #change
+    await ctx.send(f"Your ping is :{round(client.latency * 1000)} ms")
+    
+@client.command()
+async def avatar(ctx, member: discord.Member):
+    show_avatar = discord.Embed(
+
+        color = discord.Color.dark_blue()
+    )
+    show_avatar.set_image(url='{}'.format(member.avatar_url))
+    await ctx.send(embed=show_avatar)
 @client.command()
 async def clear(ctx,amount=5):
     await ctx.channel.purge(limit=amount)
@@ -53,13 +67,26 @@ async def aaja(ctx):
 @client.command()
 async def phone(ctx):
     await ctx.channel.send("if you don't have my Phone no Then don't Bothere")
+
+@client.command()
+async def what(ctx):
+    await ctx.channel.send("nothing")
+
 @client.command()
 async def users(ctx):
-    id = client.get_guild(guild id)
-    await ctx.channel.send(f"""Total Members in this Server is: {id.member_count}""")
+    member_count = len(ctx.guild.members)
+    await ctx.channel.send(f"""Total Members in this Server is: {member_count}""")
 @client.command()
 async def hi(ctx):
     await ctx.channel.send("hello")
+@client.command()
+async def no(ctx):
+    await ctx.channel.send("ok")
+@client.command()
+async def all(ctx):
+    await ctx.channel.purge(limit=1)
+    await ctx.channel.send("@everyone Khele?")
+  
 @client.command()
 async def help(ctx):  
     embed = discord.Embed(title="What can killer Frost do?",description="Some useful commands")
@@ -68,27 +95,36 @@ async def help(ctx):
     embed.add_field(name="khela",value="message")
     embed.add_field(name="join",value="add bot to voice channel")
     embed.add_field(name="leave",value="remove bot from voice channel")
-    embed.add_field(name="play youtube link..",value="play the song")
+    embed.add_field(name="play youtube/Spotify link..",value="play the song")   ##to be 
     embed.add_field(name="pause",value="pause the song")
     embed.add_field(name="resume",value="resume the song")
     embed.add_field(name="stop",value="stop the song")
-    embed.add_field(name="info",value="some basic details")    
-    embed.add_field(name="ping",value="Tells you ping")
+    embed.add_field(name="info",value="some basic details")
+    embed.add_field(name="all",value="mention everyone to play")
+    embed.add_field(name="avatar@user",value="pop up his/her display")
+    
+    
+    embed.add_field(name="ping",value="Tells you ping/Current Latency")
+    
     await ctx.channel.send(content=None, embed=embed)
-
-
 @client.command()
 async def info(ctx):  
     embed = discord.Embed(title="About Killerfrost?",description="Some details")
     embed.add_field(name="Owner",value="Ishan rajpal")
+    embed.add_field(name="Creater Discord I'd",value='KillerFrost#9884')        ##
+    embed.add_field(name="Main server",value="Hellplay")                        ##to be added
     embed.add_field(name="Capabilities",value="play music and do some stuffs")
+    embed.add_field(name="Instagram",value="ishan_rajpal")
     await ctx.channel.send(content=None, embed=embed)
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send('valid command use karo please')
 
-@client.command(pass_context=True)
+@client.command()
+async def chutia(ctx):
+    await ctx.channel.send("Tu chutia")
+@client.command(pass_context=True,aliases=['j', 'Join'])
 async def join(ctx):
     global voice
     channel = ctx.message.author.voice.channel
@@ -117,8 +153,8 @@ async def leave(ctx):
 
 @client.command(pass_context=True)
 async def play(ctx, url: str):
-
-    song_there = os.path.isfile("song.mp3")
+    
+    song_there = os.environ["song.mp3"]
     try:
         if song_there:
             os.remove("song.mp3")
@@ -140,29 +176,36 @@ async def play(ctx, url: str):
             'preferredquality':'192',
         }],
     }
+    
     try:    
        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             print("Downloading audio now\n")
             ydl.download([url])
-    except:
+            pass
+    except Exception as o:
         print("Fallback: youtube-dl does not support this url ,using spotify")
-        system("spotdl -f " + '"' + "./" + '"' + " -s " + url)
-    
+        system("spotdl -f " + '"' + "./" + '"' + " -s " + url +" -i " +"automatic")
+        
     for file in os.listdir("./"):
         if file.endswith(".mp3"):
             name = file
             print(f"Renamed File: {file}\n")
             os.rename(file, "song.mp3")
     
-    voice.play(discord.FFmpegPCMAudio("song.mp3"), after=lambda e: print("played"))
+    voice.play(discord.FFmpegPCMAudio("song.mp3"), after=lambda e: print("Played the song"))
     voice.source = discord.PCMVolumeTransformer(voice.source)
     voice.source.volume = 0.9
 
-    nname = name.rsplit("-", 2)#error
-    await ctx.send(f"Playing: {nname[0]}")
-    print("playing\n")
+    try:
+        nname = name.rsplit("-", 2)
+        await ctx.send(f"Playing: {nname[0]}")
+    except:
+        await ctx.send(f"Playing Song")
 
-@client.command(pass_context=True, aliases=['pa', 'pau'])
+    print("playing\n")
+    await ctx.send(f"Playing: {nname[0]}")
+    
+@client.command(pass_context=True, aliases=['p', 'pau'])
 async def pause(ctx):
 
     voice = get(client.voice_clients, guild=ctx.guild)
@@ -200,7 +243,5 @@ async def stop(ctx):
         print("No Music playing failed to Stop")
         await ctx.send("No Music playing failed to Stop")
 
+client.run(os.environ['Discord_token'])
 
-
-
-client.run("Mine id")
