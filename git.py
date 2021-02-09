@@ -8,7 +8,8 @@ from discord import Spotify
 import shutil
 import spotipy
 
-client = commands.Bot(command_prefix = "")
+intents = discord.Intents.all()
+client = commands.Bot(command_prefix='', intents=intents)
 client.remove_command('help')
 
 global name
@@ -17,14 +18,17 @@ global name
 @client.event
 async def on_ready():
     await client.change_presence(status=discord.Status.online, activity=discord.Game('With my own life'))
-    print("Logged in as: " + client.user.name + "\n")
+    print(f'We have logged in as {client.user}')
+
 @client.event
 async def on_member_join(member):
-    print(f'{member} has joined a server.')                     #change
+    guild=member.guild
+    await member.send(str(f'welcome to {guild}'))
+    #await member.send(str(f'welcome to {channel}'))
     for channel in member.guild.channels:
         if str(channel) == "general":
             await channel.send(f"""Welcome to the server {member.mention}""")
-            await channel.send("Member += 1")
+            #await member.dm_channel.send(str(f"{mention},Welcome to the server{guild}").format(mention=mention,guild=guild))
             member_count = len(channel.guild.members)
             await channel.send(f"""Total Members in this Server is: {member_count}""")
 
@@ -33,12 +37,16 @@ async def on_member_remove(member):
     print(f'{member} has left a server.')
     for channel in member.guild.channels:                   #change
         if str(channel) == "general":
-            await channel.send(f"""Member has been Kicked/Removed from server {member.mention}""")
+            await channel.send(f"""Sayonara{member.mention}""")
             await channel.send("Member -= 1")
             member_count = len(channel.guild.members)
             await channel.send(f"""Total Members in this Server is: {member_count}""")
 
-
+@client.command()
+async def kick(ctx, member : discord.Member, *,reason=None):
+    await ctx.channel.purge(limit=2)
+    await member.kick(reason=reason)
+    await ctx.send(f'kicked{member.mention}')
 @client.command()
 async def ping(ctx):                        #change
     await ctx.send(f"Your ping is :{round(client.latency * 1000)} ms")
@@ -154,7 +162,7 @@ async def leave(ctx):
 @client.command(pass_context=True)
 async def play(ctx, url: str):
     
-    song_there = os.environ["song.mp3"]
+    song_there = os.path.isfile("song.mp3")
     try:
         if song_there:
             os.remove("song.mp3")
