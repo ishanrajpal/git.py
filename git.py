@@ -94,10 +94,14 @@ async def no(ctx):
 async def all(ctx):
     await ctx.channel.purge(limit=1)
     await ctx.channel.send("@everyone Khele?")
+@client.command()
+async def git(ctx):
+    await ctx.channel.send("https://github.com/ishanrajpal")
   
 @client.command()
-async def help(ctx):  
+async def help(ctx):
     embed = discord.Embed(title="What can killer Frost do?",description="Some useful commands")
+    embed.add_field(name="Github",value="https://github.com/ishanrajpal")
     embed.add_field(name="hi",value="Greets the user")
     embed.add_field(name="users",value="Prints no of users")
     embed.add_field(name="khela",value="message")
